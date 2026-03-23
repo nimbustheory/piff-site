@@ -176,6 +176,7 @@ export default function Sponsor() {
                       alt={sponsor.name}
                       className="w-full h-full object-contain"
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 ))}
@@ -211,6 +212,7 @@ export default function Sponsor() {
                       alt={sponsor.name}
                       className="w-full h-full object-contain"
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 ))}

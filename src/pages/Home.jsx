@@ -18,6 +18,9 @@ function Hero() {
           src="/hero/home-hero.jpg"
           alt="Portland Film Festival audience in a packed theater"
           className="absolute inset-0 w-full h-full object-cover"
+          fetchpriority="high"
+          decoding="async"
+          sizes="100vw"
         />
 
         {/* Dark overlay for text readability */}
@@ -114,6 +117,8 @@ function AboutStrip() {
                 src="/homescreen/cinema-is-culture.jpg"
                 alt="Cinema is Culture"
                 className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             {/* Floating badge */}

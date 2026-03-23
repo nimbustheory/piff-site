@@ -30,9 +30,23 @@ export const tmdbApi = {
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`
   },
 
+  getImageSrcSet: (path, sizes = ['w185', 'w342', 'w500']) => {
+    if (!path) return undefined
+    const widthMap = { w92: 92, w154: 154, w185: 185, w342: 342, w500: 500, w780: 780 }
+    return sizes.map(s => `${TMDB_IMAGE_BASE_URL}/${s}${path} ${widthMap[s]}w`).join(', ')
+  },
+
   getBackdropUrl: (path, size = 'w1280') => {
     if (!path) return null
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`
+  },
+
+  getBackdropSrcSet: (path) => {
+    if (!path) return undefined
+    return [
+      `${TMDB_IMAGE_BASE_URL}/w780${path} 780w`,
+      `${TMDB_IMAGE_BASE_URL}/w1280${path} 1280w`,
+    ].join(', ')
   },
 
   searchMovies: async (query, page = 1) => {

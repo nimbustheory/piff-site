@@ -65,6 +65,8 @@ export default function Media() {
                     src={logo.src}
                     alt={logo.title}
                     className="max-h-40 max-w-full object-contain"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
 

@@ -122,6 +122,9 @@ export function PageHero({ label, title, subtitle, heroImage }) {
               alt=""
               role="presentation"
               className="absolute inset-0 w-full h-full object-cover"
+              fetchpriority="high"
+              decoding="async"
+              sizes="100vw"
             />
             <div className="absolute inset-0 bg-noir-950/40" />
             <div className="absolute inset-0 bg-gradient-to-b from-noir-950/80 via-transparent to-noir-950/90" />

@@ -104,6 +104,8 @@ export default function Programs() {
                   src="/photos/festival-audience.jpg"
                   alt="Portland Film Club members at a screening"
                   className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-noir-950 via-noir-950/40 to-transparent" />
                 <div className="absolute bottom-4 left-6">
@@ -238,6 +240,8 @@ export default function Programs() {
                   src="/photos/futurefilmmakers.jpg"
                   alt="FutureFilmmakers youth workshop"
                   className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-noir-950 via-noir-950/40 to-transparent" />
                 <div className="absolute bottom-4 left-6">

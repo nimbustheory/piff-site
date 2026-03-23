@@ -40,6 +40,7 @@ function FilmCard({ film, onClick, index }) {
   const rating = film.vote_average?.toFixed(1)
   const year = film.release_date?.slice(0, 4)
   const posterUrl = tmdbApi.getImageUrl(film.poster_path, 'w342')
+  const posterSrcSet = tmdbApi.getImageSrcSet(film.poster_path, ['w185', 'w342', 'w500'])
 
   return (
     <div
@@ -52,9 +53,12 @@ function FilmCard({ film, onClick, index }) {
         {posterUrl ? (
           <img
             src={posterUrl}
+            srcSet={posterSrcSet}
+            sizes="(min-width: 1024px) 16vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
             alt={film.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-cream/20">
@@ -87,8 +91,11 @@ function FilmCard({ film, onClick, index }) {
 function FilmModal({ film, details, onClose, loading }) {
   if (!film) return null
 
-  const backdropUrl = tmdbApi.getBackdropUrl(details?.backdrop_path || film.backdrop_path)
-  const posterUrl = tmdbApi.getImageUrl(details?.poster_path || film.poster_path, 'w500')
+  const backdropPath = details?.backdrop_path || film.backdrop_path
+  const backdropUrl = tmdbApi.getBackdropUrl(backdropPath)
+  const backdropSrcSet = tmdbApi.getBackdropSrcSet(backdropPath)
+  const posterPath = details?.poster_path || film.poster_path
+  const posterUrl = tmdbApi.getImageUrl(posterPath, 'w500')
   const director = details ? tmdbApi.getDirector(details.credits) : null
   const trailerUrl = details ? tmdbApi.getTrailerUrl(details.videos) : null
   const genres = details?.genres?.map((g) => g.name) || tmdbApi.getGenreNames(film.genre_ids || [])
@@ -111,7 +118,7 @@ function FilmModal({ film, details, onClose, loading }) {
         {/* Backdrop */}
         {backdropUrl && (
           <div className="relative h-64 md:h-80 overflow-hidden">
-            <img src={backdropUrl} alt="" className="w-full h-full object-cover" />
+            <img src={backdropUrl} srcSet={backdropSrcSet} sizes="(min-width: 896px) 896px, 100vw" alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
             <div className="absolute inset-0 bg-gradient-to-t from-noir-950 via-noir-950/60 to-transparent" />
           </div>
         )}
@@ -121,7 +128,7 @@ function FilmModal({ film, details, onClose, loading }) {
             {/* Poster */}
             {posterUrl && (
               <div className="w-40 flex-shrink-0 -mt-24 relative z-10 hidden md:block">
-                <img src={posterUrl} alt={film.title} className="w-full shadow-2xl" />
+                <img src={posterUrl} alt={film.title} className="w-full shadow-2xl" loading="lazy" decoding="async" />
               </div>
             )}
 
@@ -210,6 +217,7 @@ function FilmModal({ film, details, onClose, loading }) {
                               alt={c.name}
                               className="w-full h-full object-cover"
                               loading="lazy"
+                              decoding="async"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-cream/20">
@@ -244,24 +252,31 @@ export default function Films() {
   const [searchResults, setSearchResults] = useState([])
   const [searching, setSearching] = useState(false)
 
-  // Load curated festival films
+  // Load curated festival films (parallel fetch for speed)
   useEffect(() => {
     let cancelled = false
     async function loadFilms() {
       setLoading(true)
       const results = {}
-      for (const [section, filmList] of Object.entries(FESTIVAL_FILMS)) {
-        const loaded = []
-        for (const entry of filmList) {
-          try {
-            const data = await tmdbApi.getMovieDetails(entry.id)
-            if (!cancelled) loaded.push({ ...data, category: entry.category })
-          } catch {
-            // skip failed fetches
-          }
-        }
-        if (!cancelled) results[section] = loaded
-      }
+      const sections = Object.entries(FESTIVAL_FILMS)
+
+      // Fetch all sections in parallel
+      await Promise.all(
+        sections.map(async ([section, filmList]) => {
+          const loaded = await Promise.all(
+            filmList.map(async (entry) => {
+              try {
+                const data = await tmdbApi.getMovieDetails(entry.id)
+                return { ...data, category: entry.category }
+              } catch {
+                return null
+              }
+            })
+          )
+          if (!cancelled) results[section] = loaded.filter(Boolean)
+        })
+      )
+
       if (!cancelled) {
         setFilms(results)
         setLoading(false)
